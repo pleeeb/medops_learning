@@ -1,0 +1,289 @@
+﻿app.py:3:80: E501 line too long (95 > 79 characters)
+app.py:7:1: F401 'random' imported but unused
+app.py:57:1: W293 blank line contains whitespace
+app.py:62:1: W293 blank line contains whitespace
+app.py:68:1: W293 blank line contains whitespace
+app.py:74:1: W293 blank line contains whitespace
+app.py:75:34: W291 trailing whitespace
+app.py:82:1: W293 blank line contains whitespace
+app.py:92:1: W293 blank line contains whitespace
+app.py:100:1: W293 blank line contains whitespace
+app.py:108:1: W293 blank line contains whitespace
+app.py:116:1: W293 blank line contains whitespace
+app.py:128:1: W293 blank line contains whitespace
+app.py:137:1: W293 blank line contains whitespace
+app.py:145:1: W293 blank line contains whitespace
+app.py:153:1: W293 blank line contains whitespace
+app.py:165:1: W293 blank line contains whitespace
+app.py:175:1: W293 blank line contains whitespace
+app.py:186:1: W293 blank line contains whitespace
+app.py:194:1: W293 blank line contains whitespace
+app.py:205:1: W293 blank line contains whitespace
+app.py:210:1: W293 blank line contains whitespace
+app.py:217:1: W293 blank line contains whitespace
+app.py:225:1: W293 blank line contains whitespace
+app.py:232:1: W293 blank line contains whitespace
+app.py:237:1: W293 blank line contains whitespace
+app.py:244:1: W293 blank line contains whitespace
+app.py:247:80: E501 line too long (83 > 79 characters)
+app.py:253:1: W293 blank line contains whitespace
+app.py:277:1: W293 blank line contains whitespace
+app.py:282:1: W293 blank line contains whitespace
+app.py:283:33: W291 trailing whitespace
+app.py:287:1: W293 blank line contains whitespace
+app.py:293:1: W293 blank line contains whitespace
+app.py:297:1: W293 blank line contains whitespace
+app.py:303:1: W293 blank line contains whitespace
+app.py:307:1: W293 blank line contains whitespace
+app.py:330:1: W293 blank line contains whitespace
+app.py:333:80: E501 line too long (92 > 79 characters)
+app.py:336:80: E501 line too long (106 > 79 characters)
+app.py:340:21: F541 f-string is missing placeholders
+app.py:345:1: W293 blank line contains whitespace
+app.py:347:1: W293 blank line contains whitespace
+app.py:349:1: W293 blank line contains whitespace
+app.py:351:80: E501 line too long (81 > 79 characters)
+app.py:352:1: W293 blank line contains whitespace
+app.py:357:24: W291 trailing whitespace
+app.py:359:1: W293 blank line contains whitespace
+app.py:365:1: W293 blank line contains whitespace
+app.py:373:1: W293 blank line contains whitespace
+app.py:375:1: W293 blank line contains whitespace
+app.py:391:30: W291 trailing whitespace
+app.py:399:5: E303 too many blank lines (2)
+app.py:408:80: E501 line too long (109 > 79 characters)
+app.py:410:80: E501 line too long (125 > 79 characters)
+app.py:411:80: E501 line too long (116 > 79 characters)
+app.py:412:80: E501 line too long (117 > 79 characters)
+app.py:416:1: W293 blank line contains whitespace
+app.py:418:1: W293 blank line contains whitespace
+app.py:420:80: E501 line too long (88 > 79 characters)
+app.py:425:1: W293 blank line contains whitespace
+app.py:429:1: W293 blank line contains whitespace
+app.py:431:1: W293 blank line contains whitespace
+app.py:439:1: W293 blank line contains whitespace
+app.py:441:1: W293 blank line contains whitespace
+app.py:443:1: W293 blank line contains whitespace
+app.py:445:80: E501 line too long (133 > 79 characters)
+app.py:446:80: E501 line too long (117 > 79 characters)
+app.py:447:1: W293 blank line contains whitespace
+app.py:449:80: E501 line too long (128 > 79 characters)
+app.py:450:80: E501 line too long (111 > 79 characters)
+app.py:451:1: W293 blank line contains whitespace
+app.py:453:80: E501 line too long (126 > 79 characters)
+app.py:454:80: E501 line too long (117 > 79 characters)
+app.py:455:1: W293 blank line contains whitespace
+app.py:456:80: E501 line too long (91 > 79 characters)
+app.py:458:1: W293 blank line contains whitespace
+app.py:463:1: W293 blank line contains whitespace
+app.py:466:1: W293 blank line contains whitespace
+app.py:470:1: W293 blank line contains whitespace
+app.py:475:80: E501 line too long (81 > 79 characters)
+app.py:481:80: E501 line too long (80 > 79 characters)
+app.py:484:1: W293 blank line contains whitespace
+app.py:487:1: W293 blank line contains whitespace
+app.py:490:80: E501 line too long (110 > 79 characters)
+app.py:492:80: E501 line too long (110 > 79 characters)
+app.py:492:111: W291 trailing whitespace
+app.py:493:80: E501 line too long (97 > 79 characters)
+app.py:493:98: W291 trailing whitespace
+app.py:494:80: E501 line too long (105 > 79 characters)
+app.py:496:80: E501 line too long (98 > 79 characters)
+app.py:501:1: W293 blank line contains whitespace
+app.py:527:1: W293 blank line contains whitespace
+app.py:530:80: E501 line too long (93 > 79 characters)
+app.py:535:5: E303 too many blank lines (2)
+app.py:541:1: W293 blank line contains whitespace
+app.py:545:80: E501 line too long (93 > 79 characters)
+app.py:548:1: W293 blank line contains whitespace
+app.py:559:1: W293 blank line contains whitespace
+app.py:568:1: W293 blank line contains whitespace
+app.py:570:1: W293 blank line contains whitespace
+app.py:573:80: E501 line too long (93 > 79 characters)
+app.py:574:80: E501 line too long (83 > 79 characters)
+app.py:578:1: W293 blank line contains whitespace
+app.py:581:1: W293 blank line contains whitespace
+app.py:583:1: W293 blank line contains whitespace
+app.py:586:80: E501 line too long (113 > 79 characters)
+app.py:589:1: W293 blank line contains whitespace
+app.py:597:1: W293 blank line contains whitespace
+app.py:598:80: E501 line too long (89 > 79 characters)
+app.py:600:1: W293 blank line contains whitespace
+app.py:603:80: E501 line too long (83 > 79 characters)
+app.py:605:1: W293 blank line contains whitespace
+app.py:609:1: W293 blank line contains whitespace
+app.py:620:80: E501 line too long (98 > 79 characters)
+app.py:623:1: W293 blank line contains whitespace
+app.py:626:1: W293 blank line contains whitespace
+app.py:634:5: E303 too many blank lines (2)
+app.py:640:1: W293 blank line contains whitespace
+app.py:642:1: W293 blank line contains whitespace
+app.py:651:1: W293 blank line contains whitespace
+app.py:654:80: E501 line too long (90 > 79 characters)
+app.py:658:1: W293 blank line contains whitespace
+app.py:661:1: W293 blank line contains whitespace
+app.py:663:1: W293 blank line contains whitespace
+app.py:669:1: W293 blank line contains whitespace
+app.py:677:1: W293 blank line contains whitespace
+app.py:678:80: E501 line too long (89 > 79 characters)
+app.py:681:1: W293 blank line contains whitespace
+app.py:689:80: E501 line too long (109 > 79 characters)
+app.py:691:1: W293 blank line contains whitespace
+app.py:693:1: W293 blank line contains whitespace
+app.py:696:1: W293 blank line contains whitespace
+app.py:702:1: W293 blank line contains whitespace
+app.py:711:1: W293 blank line contains whitespace
+app.py:714:80: E501 line too long (90 > 79 characters)
+app.py:718:1: W293 blank line contains whitespace
+app.py:721:1: W293 blank line contains whitespace
+app.py:723:1: W293 blank line contains whitespace
+app.py:729:1: W293 blank line contains whitespace
+app.py:737:1: W293 blank line contains whitespace
+app.py:738:80: E501 line too long (89 > 79 characters)
+app.py:741:1: W293 blank line contains whitespace
+app.py:749:80: E501 line too long (101 > 79 characters)
+app.py:751:1: W293 blank line contains whitespace
+app.py:753:1: W293 blank line contains whitespace
+app.py:756:1: W293 blank line contains whitespace
+app.py:764:5: E303 too many blank lines (2)
+app.py:770:1: W293 blank line contains whitespace
+app.py:774:80: E501 line too long (108 > 79 characters)
+app.py:782:1: W293 blank line contains whitespace
+app.py:785:80: E501 line too long (89 > 79 characters)
+app.py:786:80: E501 line too long (81 > 79 characters)
+app.py:789:1: W293 blank line contains whitespace
+app.py:792:1: W293 blank line contains whitespace
+app.py:794:1: W293 blank line contains whitespace
+app.py:800:1: W293 blank line contains whitespace
+app.py:802:1: W293 blank line contains whitespace
+app.py:804:1: W293 blank line contains whitespace
+app.py:807:80: E501 line too long (112 > 79 characters)
+app.py:808:1: W293 blank line contains whitespace
+app.py:811:80: E501 line too long (115 > 79 characters)
+app.py:812:1: W293 blank line contains whitespace
+app.py:815:80: E501 line too long (110 > 79 characters)
+app.py:816:1: W293 blank line contains whitespace
+app.py:817:80: E501 line too long (91 > 79 characters)
+app.py:819:1: W293 blank line contains whitespace
+app.py:823:1: W293 blank line contains whitespace
+app.py:825:1: W293 blank line contains whitespace
+app.py:829:80: E501 line too long (93 > 79 characters)
+app.py:834:80: E501 line too long (80 > 79 characters)
+app.py:838:80: E501 line too long (84 > 79 characters)
+app.py:839:1: W293 blank line contains whitespace
+app.py:846:1: W293 blank line contains whitespace
+app.py:848:1: W293 blank line contains whitespace
+app.py:851:1: W293 blank line contains whitespace
+app.py:859:5: E303 too many blank lines (2)
+app.py:865:1: W293 blank line contains whitespace
+app.py:867:1: W293 blank line contains whitespace
+app.py:875:1: W293 blank line contains whitespace
+app.py:876:80: E501 line too long (124 > 79 characters)
+app.py:877:1: W293 blank line contains whitespace
+app.py:880:80: E501 line too long (92 > 79 characters)
+app.py:881:80: E501 line too long (83 > 79 characters)
+app.py:884:1: W293 blank line contains whitespace
+app.py:887:1: W293 blank line contains whitespace
+app.py:889:1: W293 blank line contains whitespace
+app.py:895:1: W293 blank line contains whitespace
+app.py:903:1: W293 blank line contains whitespace
+app.py:904:80: E501 line too long (91 > 79 characters)
+app.py:907:1: W293 blank line contains whitespace
+app.py:915:80: E501 line too long (116 > 79 characters)
+app.py:917:1: W293 blank line contains whitespace
+app.py:919:1: W293 blank line contains whitespace
+app.py:922:1: W293 blank line contains whitespace
+app.py:928:1: W293 blank line contains whitespace
+app.py:936:1: W293 blank line contains whitespace
+app.py:945:1: W293 blank line contains whitespace
+app.py:948:80: E501 line too long (92 > 79 characters)
+app.py:949:80: E501 line too long (83 > 79 characters)
+app.py:952:1: W293 blank line contains whitespace
+app.py:955:1: W293 blank line contains whitespace
+app.py:957:1: W293 blank line contains whitespace
+app.py:963:1: W293 blank line contains whitespace
+app.py:981:1: W293 blank line contains whitespace
+app.py:982:80: E501 line too long (91 > 79 characters)
+app.py:984:1: W293 blank line contains whitespace
+app.py:987:1: W293 blank line contains whitespace
+app.py:991:80: E501 line too long (83 > 79 characters)
+app.py:997:80: E501 line too long (83 > 79 characters)
+app.py:1000:1: W293 blank line contains whitespace
+app.py:1002:1: W293 blank line contains whitespace
+app.py:1005:1: W293 blank line contains whitespace
+app.py:1013:5: E303 too many blank lines (2)
+app.py:1019:1: W293 blank line contains whitespace
+app.py:1023:80: E501 line too long (126 > 79 characters)
+app.py:1026:1: W293 blank line contains whitespace
+app.py:1032:1: W293 blank line contains whitespace
+app.py:1036:80: E501 line too long (88 > 79 characters)
+app.py:1039:1: W293 blank line contains whitespace
+app.py:1042:1: W293 blank line contains whitespace
+app.py:1044:1: W293 blank line contains whitespace
+app.py:1050:1: W293 blank line contains whitespace
+app.py:1052:1: W293 blank line contains whitespace
+app.py:1054:1: W293 blank line contains whitespace
+app.py:1056:80: E501 line too long (129 > 79 characters)
+app.py:1057:1: W293 blank line contains whitespace
+app.py:1059:80: E501 line too long (152 > 79 characters)
+app.py:1060:1: W293 blank line contains whitespace
+app.py:1062:80: E501 line too long (127 > 79 characters)
+app.py:1063:1: W293 blank line contains whitespace
+app.py:1064:80: E501 line too long (88 > 79 characters)
+app.py:1065:80: E501 line too long (82 > 79 characters)
+app.py:1066:80: E501 line too long (86 > 79 characters)
+app.py:1068:1: W293 blank line contains whitespace
+app.py:1069:80: E501 line too long (83 > 79 characters)
+app.py:1070:1: W293 blank line contains whitespace
+app.py:1074:80: E501 line too long (88 > 79 characters)
+app.py:1080:80: E501 line too long (145 > 79 characters)
+app.py:1083:1: W293 blank line contains whitespace
+app.py:1085:1: W293 blank line contains whitespace
+app.py:1088:1: W293 blank line contains whitespace
+app.py:1094:1: W293 blank line contains whitespace
+app.py:1097:1: W293 blank line contains whitespace
+app.py:1099:1: W293 blank line contains whitespace
+app.py:1101:80: E501 line too long (118 > 79 characters)
+app.py:1102:80: E501 line too long (95 > 79 characters)
+app.py:1103:1: W293 blank line contains whitespace
+app.py:1105:80: E501 line too long (122 > 79 characters)
+app.py:1106:80: E501 line too long (95 > 79 characters)
+app.py:1107:1: W293 blank line contains whitespace
+app.py:1110:80: E501 line too long (90 > 79 characters)
+app.py:1112:80: E501 line too long (86 > 79 characters)
+app.py:1113:80: E501 line too long (88 > 79 characters)
+app.py:1114:1: W293 blank line contains whitespace
+app.py:1119:80: E501 line too long (106 > 79 characters)
+app.py:1120:80: E501 line too long (106 > 79 characters)
+app.py:1121:80: E501 line too long (107 > 79 characters)
+app.py:1122:80: E501 line too long (95 > 79 characters)
+app.py:1123:80: E501 line too long (95 > 79 characters)
+app.py:1130:1: E303 too many blank lines (3)
+app.py:1135:80: E501 line too long (97 > 79 characters)
+app.py:1136:1: W293 blank line contains whitespace
+app.py:1138:23: W291 trailing whitespace
+app.py:1139:32: W291 trailing whitespace
+app.py:1142:1: W293 blank line contains whitespace
+app.py:1144:1: W293 blank line contains whitespace
+app.py:1150:80: E501 line too long (99 > 79 characters)
+app.py:1153:1: W293 blank line contains whitespace
+app.py:1157:80: E501 line too long (111 > 79 characters)
+app.py:1158:80: E501 line too long (87 > 79 characters)
+app.py:1162:1: W293 blank line contains whitespace
+app.py:1165:80: E501 line too long (83 > 79 characters)
+app.py:1166:1: W293 blank line contains whitespace
+app.py:1168:1: W293 blank line contains whitespace
+app.py:1176:1: W293 blank line contains whitespace
+app.py:1179:80: E501 line too long (94 > 79 characters)
+app.py:1181:1: W293 blank line contains whitespace
+app.py:1185:1: W293 blank line contains whitespace
+app.py:1191:1: W293 blank line contains whitespace
+app.py:1193:1: W293 blank line contains whitespace
+app.py:1195:80: E501 line too long (98 > 79 characters)
+app.py:1206:80: E501 line too long (96 > 79 characters)
+app.py:1207:80: E501 line too long (80 > 79 characters)
+app.py:1210:1: W293 blank line contains whitespace
+app.py:1212:80: E501 line too long (102 > 79 characters)
+app.py:1222:80: E501 line too long (88 > 79 characters)
+app.py:1223:80: E501 line too long (136 > 79 characters)
+app.py:1225:29: W292 no newline at end of file

@@ -4,8 +4,8 @@ An interactive educational application for nursing students to master drug dosag
 """
 
 import streamlit as st
-import random
 from utils import (
+    generate_medops_problem,
     generate_sentence_problem,
     generate_conversion_problem,
     generate_tablet_problem,
@@ -268,6 +268,11 @@ def init_session_state():
         # Scores
         'total_correct': 0,
         'total_attempted': 0,
+
+        'medops_problem': None,
+        'medops_submitted': False,
+        'medops_correct': False,
+        'medops_user_ans': None,
         
         # Module A - Sentence Decipher
         'sentence_problem': None,
@@ -313,6 +318,13 @@ init_session_state()
 
 with st.sidebar:
     st.markdown("# 💊 Dosage Master Pro")
+    st.markdown("---")
+
+    app_mode = st.radio(
+        "📚 Select Training Module",
+        ["🔢 Drug Calculations", "🩺 Clinical Pharmacology (MedOps)"]
+    )
+
     st.markdown("---")
     
     # Score display
@@ -369,748 +381,842 @@ with st.sidebar:
 # ============================================================================
 # MAIN CONTENT - TABS
 # ============================================================================
+if app_mode == "🔢 Drug Calculations":
+    st.markdown("# 💊 Dosage Master Pro")
+    st.markdown("*Master drug calculations through interactive practice*")
 
-st.markdown("# 💊 Dosage Master Pro")
-st.markdown("*Master drug calculations through interactive practice*")
-
-tabs = st.tabs([
-    "🔍 A: Sentence Decipher",
-    "📏 B: Unit Bootcamp", 
-    "💊 C: Tablet & Liquid",
-    "👶 D: Pediatric Dosing",
-    "💉 E: Infusions",
-    "💰 F: Cost Savings"
-])
+    tabs = st.tabs([
+        "🔍 A: Sentence Decipher",
+        "📏 B: Unit Bootcamp", 
+        "💊 C: Tablet & Liquid",
+        "👶 D: Pediatric Dosing",
+        "💉 E: Infusions",
+        "💰 F: Cost Savings"
+    ])
 
 
-# ============================================================================
-# MODULE A: SENTENCE DECIPHER
-# ============================================================================
+    # ============================================================================
+    # MODULE A: SENTENCE DECIPHER
+    # ============================================================================
 
-with tabs[0]:
-    st.markdown("## 🔍 Module A: Sentence Decipher")
-    st.markdown("""
-    <div class="info-card">
-        <h3>🎯 Goal: Learn to Extract Variables from Clinical Text</h3>
-        <p>The hardest part of drug calculations isn't the math—it's identifying WHAT numbers to use!</p>
-        <ul>
-            <li><span class="highlight-desired">Desired (D)</span> = What the patient NEEDS (the order/prescription)</li>
-            <li><span class="highlight-have">Have (H)</span> = What concentration/strength you HAVE on hand</li>
-            <li><span class="highlight-vehicle">Vehicle (V)</span> = The form it comes in (tablet, mL, etc.)</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([3, 1])
-    
-    with col2:
-        if st.button("🎲 New Problem", key="new_sentence", use_container_width=True):
+    with tabs[0]:
+        st.markdown("## 🔍 Module A: Sentence Decipher")
+        st.markdown("""
+        <div class="info-card">
+            <h3>🎯 Goal: Learn to Extract Variables from Clinical Text</h3>
+            <p>The hardest part of drug calculations isn't the math—it's identifying WHAT numbers to use!</p>
+            <ul>
+                <li><span class="highlight-desired">Desired (D)</span> = What the patient NEEDS (the order/prescription)</li>
+                <li><span class="highlight-have">Have (H)</span> = What concentration/strength you HAVE on hand</li>
+                <li><span class="highlight-vehicle">Vehicle (V)</span> = The form it comes in (tablet, mL, etc.)</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns([3, 1])
+        
+        with col2:
+            if st.button("🎲 New Problem", key="new_sentence", use_container_width=True):
+                st.session_state.sentence_problem = generate_sentence_problem()
+                st.session_state.sentence_submitted = False
+                st.session_state.sentence_correct = False
+                st.rerun()
+        
+        # Generate initial problem if none exists
+        if st.session_state.sentence_problem is None:
             st.session_state.sentence_problem = generate_sentence_problem()
-            st.session_state.sentence_submitted = False
-            st.session_state.sentence_correct = False
-            st.rerun()
-    
-    # Generate initial problem if none exists
-    if st.session_state.sentence_problem is None:
-        st.session_state.sentence_problem = generate_sentence_problem()
-    
-    problem = st.session_state.sentence_problem
-    
-    # Display the clinical scenario
-    st.markdown(f"""
-    <div class="scenario-text">
-        📋 <strong>Clinical Scenario:</strong><br><br>
-        {problem['sentence']}
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("### 🎯 Identify the Variables")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown('<p style="color: #10b981; font-weight: 600;">Desired (D) - What patient needs:</p>', unsafe_allow_html=True)
-        user_desired = st.number_input("Enter value:", key="inp_desired", min_value=0.0, step=0.1, format="%.2f")
-    
-    with col2:
-        st.markdown('<p style="color: #f59e0b; font-weight: 600;">Have (H) - Strength on hand:</p>', unsafe_allow_html=True)
-        user_have = st.number_input("Enter value:", key="inp_have", min_value=0.0, step=0.1, format="%.2f")
-    
-    with col3:
-        st.markdown('<p style="color: #8b5cf6; font-weight: 600;">Vehicle (V) - Form/Volume:</p>', unsafe_allow_html=True)
-        user_vehicle = st.number_input("Enter value:", key="inp_vehicle", min_value=0.0, step=0.1, format="%.2f")
-    
-    if st.button("✅ Check My Answers", key="check_sentence", use_container_width=True):
-        st.session_state.sentence_submitted = True
         
-        # Check answers (allow small tolerance for floating point)
-        desired_correct = abs(user_desired - problem['desired']) < 0.01
-        have_correct = abs(user_have - problem['have']) < 0.01
-        vehicle_correct = abs(user_vehicle - problem['vehicle']) < 0.01
+        problem = st.session_state.sentence_problem
         
-        all_correct = desired_correct and have_correct and vehicle_correct
-        st.session_state.sentence_correct = all_correct
-        
-        if all_correct:
-            st.session_state.total_correct += 1
-        st.session_state.total_attempted += 1
-    
-    if st.session_state.sentence_submitted:
-        if st.session_state.sentence_correct:
-            st.markdown("""
-            <div class="success-card">
-                <h3>✅ Excellent! You correctly identified all variables!</h3>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown("""
-            <div class="error-card">
-                <h3>❌ Not quite right. Let's review the correct values:</h3>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # Show the formula mapping
-        st.markdown("### 📐 Formula Mapping")
-        
-        st.markdown(f"""
-        <div class="formula-box">
-            <p style="font-size: 1.1rem; color: #94a3b8; margin-bottom: 12px;">Plugging in the values:</p>
-            <div style="font-size: 1.5rem; color: #f8fafc;">
-                X = <span class="highlight-desired">{problem['desired']}{problem['desired_unit']}</span> ÷ 
-                <span class="highlight-have">{problem['have']}{problem['have_unit']}</span> × 
-                <span class="highlight-vehicle">{problem['vehicle']} {problem['vehicle_unit']}</span>
-            </div>
-            <p style="font-size: 1.3rem; color: #10b981; margin-top: 16px; font-weight: 600;">
-                = {problem['answer']} {problem['answer_unit']}
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        with st.expander("📝 Show Full Working"):
-            if problem['formula'] == 'tablets':
-                st.markdown(format_working_tablet({
-                    'desired': problem['desired'],
-                    'have': problem['have'],
-                    'answer': problem['answer']
-                }))
-            elif problem['formula'] == 'liquid':
-                st.markdown(format_working_liquid({
-                    'desired': problem['desired'],
-                    'have': problem['have'],
-                    'vehicle': problem['vehicle'],
-                    'answer': problem['answer']
-                }))
-            else:
-                st.markdown(format_working_pediatric({
-                    'weight': problem.get('weight', 0),
-                    'dose_per_kg': problem.get('dose_per_kg', 0),
-                    'total_daily': problem['desired'],
-                    'frequency': 1,
-                    'per_dose': problem['desired'],
-                    'have': problem['have'],
-                    'vehicle': problem['vehicle'],
-                    'volume_per_dose': problem['answer']
-                }))
-        
-        st.markdown(f"""
-        <div class="sanity-check">
-            {get_sanity_check('tablet' if problem['formula'] == 'tablets' else 'liquid')}
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# ============================================================================
-# MODULE B: UNIT BOOTCAMP
-# ============================================================================
-
-with tabs[1]:
-    st.markdown("## 📏 Module B: Unit Bootcamp")
-    
-    st.markdown("""
-    <div class="info-card">
-        <h3>🎯 Master Unit Conversions</h3>
-        <p>Before you can calculate doses, you MUST be able to convert between units!</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Mnemonic display
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div class="mnemonic-box">
-            <h3>📉 SOLD</h3>
-            <p>Small to Large = Divide</p>
-            <p style="font-size: 0.9rem;">mcg → mg → g → kg</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="mnemonic-box">
-            <h3>📈 LOST</h3>
-            <p>Large to Small = Times</p>
-            <p style="font-size: 0.9rem;">kg → g → mg → mcg</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        if st.button("🎲 New Conversion", key="new_conversion", use_container_width=True):
-            st.session_state.conversion_problem = generate_conversion_problem()
-            st.session_state.conversion_submitted = False
-            st.session_state.conversion_correct = False
-            st.rerun()
-    
-    if st.session_state.conversion_problem is None:
-        st.session_state.conversion_problem = generate_conversion_problem()
-    
-    conv = st.session_state.conversion_problem
-    
-    st.markdown(f"""
-    <div class="scenario-text">
-        🔄 Convert: <strong>{conv['value']} {conv['from_unit']}</strong> to <strong>{conv['to_unit']}</strong>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    user_answer = st.number_input(
-        f"Your answer in {conv['to_unit']}:",
-        key="conv_answer",
-        min_value=0.0,
-        step=0.0001,
-        format="%.4f"
-    )
-    
-    if st.button("✅ Check Answer", key="check_conversion", use_container_width=True):
-        st.session_state.conversion_submitted = True
-        
-        # Check with tolerance
-        tolerance = abs(conv['answer'] * 0.01)  # 1% tolerance
-        is_correct = abs(user_answer - conv['answer']) <= max(tolerance, 0.001)
-        st.session_state.conversion_correct = is_correct
-        
-        if is_correct:
-            st.session_state.total_correct += 1
-        st.session_state.total_attempted += 1
-    
-    if st.session_state.conversion_submitted:
-        if st.session_state.conversion_correct:
-            st.markdown("""
-            <div class="success-card">
-                <h3>✅ Correct!</h3>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="error-card">
-                <h3>❌ Not quite. The correct answer is {conv['answer']} {conv['to_unit']}</h3>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with st.expander("📝 Show Working"):
-            st.markdown(format_working_conversion(conv))
-        
-        st.markdown(f"""
-        <div class="sanity-check">
-            {get_sanity_check('conversion')}
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# ============================================================================
-# MODULE C: TABLET & LIQUID DOSAGES
-# ============================================================================
-
-with tabs[2]:
-    st.markdown("## 💊 Module C: Tablet & Liquid Dosages")
-    
-    sub_tabs = st.tabs(["💊 Tablets", "🧴 Liquids"])
-    
-    # TABLETS
-    with sub_tabs[0]:
-        st.markdown("""
-        <div class="info-card">
-            <h3>💊 Tablet Calculations</h3>
-            <p>Formula: Tablets = Desired ÷ Have</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("🎲 New Problem", key="new_tablet", use_container_width=True):
-                st.session_state.tablet_problem = generate_tablet_problem()
-                st.session_state.tablet_submitted = False
-                st.rerun()
-        
-        if st.session_state.tablet_problem is None:
-            st.session_state.tablet_problem = generate_tablet_problem()
-        
-        prob = st.session_state.tablet_problem
-        
+        # Display the clinical scenario
         st.markdown(f"""
         <div class="scenario-text">
-            {prob['scenario']}
+            📋 <strong>Clinical Scenario:</strong><br><br>
+            {problem['sentence']}
         </div>
         """, unsafe_allow_html=True)
         
-        user_tablets = st.number_input(
-            "Number of tablets to give:",
-            key="tablet_answer",
-            min_value=0.0,
-            step=0.5,
-            format="%.1f"
-        )
-        
-        if st.button("✅ Check Answer", key="check_tablet", use_container_width=True):
-            st.session_state.tablet_submitted = True
-            is_correct = abs(user_tablets - prob['answer']) < 0.01
-            
-            if is_correct:
-                st.session_state.total_correct += 1
-                st.markdown("""
-                <div class="success-card"><h3>✅ Correct!</h3></div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="error-card"><h3>❌ The correct answer is {prob['answer']} tablet(s)</h3></div>
-                """, unsafe_allow_html=True)
-            
-            st.session_state.total_attempted += 1
-            
-            with st.expander("📝 Show Working"):
-                st.markdown(format_working_tablet(prob))
-            
-            st.markdown(f"""
-            <div class="sanity-check">
-                {get_sanity_check('tablet')}
-            </div>
-            """, unsafe_allow_html=True)
-    
-    # LIQUIDS
-    with sub_tabs[1]:
-        st.markdown("""
-        <div class="info-card">
-            <h3>🧴 Liquid Calculations</h3>
-            <p>Formula: Volume = (Desired ÷ Have) × Vehicle</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("🎲 New Problem", key="new_liquid", use_container_width=True):
-                st.session_state.liquid_problem = generate_liquid_problem()
-                st.session_state.liquid_submitted = False
-                st.rerun()
-        
-        if st.session_state.liquid_problem is None:
-            st.session_state.liquid_problem = generate_liquid_problem()
-        
-        prob = st.session_state.liquid_problem
-        
-        st.markdown(f"""
-        <div class="scenario-text">
-            {prob['scenario']}
-        </div>
-        """, unsafe_allow_html=True)
-        
-        user_volume = st.number_input(
-            "Volume to administer (mL):",
-            key="liquid_answer",
-            min_value=0.0,
-            step=0.1,
-            format="%.2f"
-        )
-        
-        if st.button("✅ Check Answer", key="check_liquid", use_container_width=True):
-            st.session_state.liquid_submitted = True
-            is_correct = abs(user_volume - prob['answer']) < 0.1
-            
-            if is_correct:
-                st.session_state.total_correct += 1
-                st.markdown("""
-                <div class="success-card"><h3>✅ Correct!</h3></div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="error-card"><h3>❌ The correct answer is {prob['answer']}mL</h3></div>
-                """, unsafe_allow_html=True)
-            
-            st.session_state.total_attempted += 1
-            
-            with st.expander("📝 Show Working"):
-                st.markdown(format_working_liquid(prob))
-            
-            st.markdown(f"""
-            <div class="sanity-check">
-                {get_sanity_check('liquid')}
-            </div>
-            """, unsafe_allow_html=True)
-
-
-# ============================================================================
-# MODULE D: PEDIATRIC WEIGHT-BASED DOSING
-# ============================================================================
-
-with tabs[3]:
-    st.markdown("## 👶 Module D: Pediatric Weight-Based Dosing")
-    
-    st.markdown("""
-    <div class="info-card">
-        <h3>🎯 Weight-Based Calculations (mg/kg)</h3>
-        <p>Pediatric doses are calculated based on the child's weight. This requires multiple steps!</p>
-        <ol>
-            <li>Calculate total daily dose: mg/kg × weight</li>
-            <li>Divide by frequency (how many times per day)</li>
-            <li>Convert to volume if using liquid</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([3, 1])
-    with col2:
-        if st.button("🎲 New Problem", key="new_pediatric", use_container_width=True):
-            st.session_state.pediatric_problem = generate_pediatric_problem()
-            st.session_state.pediatric_submitted = False
-            st.rerun()
-    
-    if st.session_state.pediatric_problem is None:
-        st.session_state.pediatric_problem = generate_pediatric_problem()
-    
-    prob = st.session_state.pediatric_problem
-    
-    st.markdown(f"""
-    <div class="scenario-text">
-        {prob['scenario']}
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("### 📊 Step-by-Step Entry")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.markdown("**Step 1: Total Daily Dose (mg)**")
-        user_daily = st.number_input("Daily dose:", key="ped_daily", min_value=0.0, step=1.0, format="%.1f")
-    
-    with col2:
-        st.markdown("**Step 2: Dose Per Administration (mg)**")
-        user_per_dose = st.number_input("Per dose:", key="ped_perdose", min_value=0.0, step=0.1, format="%.2f")
-    
-    with col3:
-        st.markdown("**Step 3: Volume Per Dose (mL)**")
-        user_volume = st.number_input("Volume:", key="ped_volume", min_value=0.0, step=0.1, format="%.2f")
-    
-    if st.button("✅ Check All Steps", key="check_pediatric", use_container_width=True):
-        st.session_state.pediatric_submitted = True
-        
-        daily_correct = abs(user_daily - prob['total_daily']) < 1
-        per_dose_correct = abs(user_per_dose - prob['per_dose']) < 0.5
-        volume_correct = abs(user_volume - prob['volume_per_dose']) < 0.5
-        
-        all_correct = daily_correct and per_dose_correct and volume_correct
-        
-        if all_correct:
-            st.session_state.total_correct += 1
-            st.markdown("""
-            <div class="success-card"><h3>✅ All steps correct! Excellent work!</h3></div>
-            """, unsafe_allow_html=True)
-        else:
-            results = []
-            if not daily_correct:
-                results.append(f"Step 1: Should be {prob['total_daily']}mg")
-            if not per_dose_correct:
-                results.append(f"Step 2: Should be {prob['per_dose']}mg")
-            if not volume_correct:
-                results.append(f"Step 3: Should be {prob['volume_per_dose']}mL")
-            
-            st.markdown(f"""
-            <div class="error-card">
-                <h3>❌ Some steps need correction:</h3>
-                <ul>{''.join(f'<li>{r}</li>' for r in results)}</ul>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        st.session_state.total_attempted += 1
-        
-        with st.expander("📝 Show Full Working"):
-            st.markdown(format_working_pediatric(prob))
-        
-        st.markdown(f"""
-        <div class="sanity-check">
-            {get_sanity_check('pediatric')}
-        </div>
-        """, unsafe_allow_html=True)
-
-
-# ============================================================================
-# MODULE E: INFUSIONS & DILUTIONS
-# ============================================================================
-
-with tabs[4]:
-    st.markdown("## 💉 Module E: Infusions & Dilutions")
-    
-    sub_tabs = st.tabs(["💧 IV Drip Rates", "🧪 Dilutions (C₁V₁=C₂V₂)"])
-    
-    # IV DRIP RATES
-    with sub_tabs[0]:
-        st.markdown("""
-        <div class="info-card">
-            <h3>💧 IV Drip Rate Formula</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.latex(r"\text{Drops/min} = \frac{\text{Volume (mL)}}{\text{Time (min)}} \times \text{Drop Factor (gtts/mL)}")
-        
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("🎲 New Problem", key="new_infusion", use_container_width=True):
-                st.session_state.infusion_problem = generate_infusion_problem()
-                st.session_state.infusion_submitted = False
-                st.rerun()
-        
-        if st.session_state.infusion_problem is None:
-            st.session_state.infusion_problem = generate_infusion_problem()
-        
-        prob = st.session_state.infusion_problem
-        
-        st.markdown(f"""
-        <div class="scenario-text">
-            {prob['scenario']}
-        </div>
-        """, unsafe_allow_html=True)
-        
-        user_rate = st.number_input(
-            "Drip rate (drops/minute):",
-            key="infusion_answer",
-            min_value=0.0,
-            step=0.5,
-            format="%.1f"
-        )
-        
-        if st.button("✅ Check Answer", key="check_infusion", use_container_width=True):
-            st.session_state.infusion_submitted = True
-            is_correct = abs(user_rate - prob['drops_per_min']) < 1
-            
-            if is_correct:
-                st.session_state.total_correct += 1
-                st.markdown("""
-                <div class="success-card"><h3>✅ Correct!</h3></div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="error-card"><h3>❌ The correct answer is {prob['drops_per_min']} drops/min</h3></div>
-                """, unsafe_allow_html=True)
-            
-            st.session_state.total_attempted += 1
-            
-            with st.expander("📝 Show Working"):
-                st.markdown(format_working_infusion(prob))
-            
-            st.markdown(f"""
-            <div class="sanity-check">
-                {get_sanity_check('infusion')}
-            </div>
-            """, unsafe_allow_html=True)
-    
-    # DILUTIONS
-    with sub_tabs[1]:
-        st.markdown("""
-        <div class="info-card">
-            <h3>🧪 Dilution Formula</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.latex(r"C_1V_1 = C_2V_2")
-        st.markdown("""
-        Where:
-        - **C₁** = Concentration of stock solution
-        - **V₁** = Volume of stock solution needed
-        - **C₂** = Desired final concentration
-        - **V₂** = Desired final volume
-        """)
-        
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("🎲 New Problem", key="new_dilution", use_container_width=True):
-                st.session_state.dilution_problem = generate_dilution_problem()
-                st.session_state.dilution_submitted = False
-                st.rerun()
-        
-        if st.session_state.dilution_problem is None:
-            st.session_state.dilution_problem = generate_dilution_problem()
-        
-        prob = st.session_state.dilution_problem
-        
-        st.markdown(f"""
-        <div class="scenario-text">
-            {prob['scenario']}
-        </div>
-        """, unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            user_stock = st.number_input(
-                "Stock solution volume (mL):",
-                key="dilution_stock",
-                min_value=0.0,
-                step=0.1,
-                format="%.2f"
-            )
-        with col2:
-            user_diluent = st.number_input(
-                "Diluent volume (mL):",
-                key="dilution_diluent",
-                min_value=0.0,
-                step=0.1,
-                format="%.2f"
-            )
-        
-        if st.button("✅ Check Answer", key="check_dilution", use_container_width=True):
-            st.session_state.dilution_submitted = True
-            
-            stock_correct = abs(user_stock - prob['v1']) < 0.5
-            diluent_correct = abs(user_diluent - prob['diluent']) < 0.5
-            
-            if stock_correct and diluent_correct:
-                st.session_state.total_correct += 1
-                st.markdown("""
-                <div class="success-card"><h3>✅ Both values correct!</h3></div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="error-card">
-                    <h3>❌ Correct values:</h3>
-                    <p>Stock: {prob['v1']}mL | Diluent: {prob['diluent']}mL</p>
-                </div>
-                """, unsafe_allow_html=True)
-            
-            st.session_state.total_attempted += 1
-            
-            with st.expander("📝 Show Working"):
-                st.markdown(format_working_dilution(prob))
-            
-            st.markdown(f"""
-            <div class="sanity-check">
-                {get_sanity_check('dilution')}
-            </div>
-            """, unsafe_allow_html=True)
-
-
-# ============================================================================
-# MODULE F: PHARMACOECONOMICS
-# ============================================================================
-
-with tabs[5]:
-    st.markdown("## 💰 Module F: Pharmacoeconomics - Cost Savings")
-    
-    st.markdown("""
-    <div class="info-card">
-        <h3>🎯 Calculate Medication Cost Savings</h3>
-        <p>Switching from branded to generic medications can save significant money. Learn to calculate these savings!</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    mode = st.radio(
-        "Choose mode:",
-        ["📝 Practice Problem", "🧮 Custom Calculator"],
-        horizontal=True
-    )
-    
-    if mode == "📝 Practice Problem":
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("🎲 New Problem", key="new_cost", use_container_width=True):
-                st.session_state.cost_problem = generate_cost_problem()
-                st.rerun()
-        
-        if st.session_state.cost_problem is None:
-            st.session_state.cost_problem = generate_cost_problem()
-        
-        prob = st.session_state.cost_problem
-        
-        st.markdown(f"""
-        <div class="scenario-text">
-            {prob['scenario']}
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("### Calculate the following:")
+        st.markdown("### 🎯 Identify the Variables")
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            user_saving = st.number_input("Saving per pack (£):", key="cost_saving", min_value=0.0, step=0.01, format="%.2f")
+            st.markdown('<p style="color: #10b981; font-weight: 600;">Desired (D) - What patient needs:</p>', unsafe_allow_html=True)
+            user_desired = st.number_input("Enter value:", key="inp_desired", min_value=0.0, step=0.1, format="%.2f")
         
         with col2:
-            user_percent = st.number_input("Percentage reduction (%):", key="cost_percent", min_value=0.0, max_value=100.0, step=0.1, format="%.1f")
+            st.markdown('<p style="color: #f59e0b; font-weight: 600;">Have (H) - Strength on hand:</p>', unsafe_allow_html=True)
+            user_have = st.number_input("Enter value:", key="inp_have", min_value=0.0, step=0.1, format="%.2f")
         
         with col3:
-            user_weekly = st.number_input("Weekly saving (£):", key="cost_weekly", min_value=0.0, step=0.01, format="%.2f")
+            st.markdown('<p style="color: #8b5cf6; font-weight: 600;">Vehicle (V) - Form/Volume:</p>', unsafe_allow_html=True)
+            user_vehicle = st.number_input("Enter value:", key="inp_vehicle", min_value=0.0, step=0.1, format="%.2f")
         
-        if st.button("✅ Check Answers", key="check_cost", use_container_width=True):
-            saving_correct = abs(user_saving - prob['saving_per_pack']) < 0.05
-            percent_correct = abs(user_percent - prob['percentage_reduction']) < 1
-            weekly_correct = abs(user_weekly - prob['weekly_saving']) < 0.1
+        if st.button("✅ Check My Answers", key="check_sentence", use_container_width=True):
+            st.session_state.sentence_submitted = True
             
-            all_correct = saving_correct and percent_correct and weekly_correct
+            # Check answers (allow small tolerance for floating point)
+            desired_correct = abs(user_desired - problem['desired']) < 0.01
+            have_correct = abs(user_have - problem['have']) < 0.01
+            vehicle_correct = abs(user_vehicle - problem['vehicle']) < 0.01
+            
+            all_correct = desired_correct and have_correct and vehicle_correct
+            st.session_state.sentence_correct = all_correct
             
             if all_correct:
                 st.session_state.total_correct += 1
+            st.session_state.total_attempted += 1
+        
+        if st.session_state.sentence_submitted:
+            if st.session_state.sentence_correct:
                 st.markdown("""
-                <div class="success-card"><h3>✅ All calculations correct!</h3></div>
+                <div class="success-card">
+                    <h3>✅ Excellent! You correctly identified all variables!</h3>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div class="error-card">
+                    <h3>❌ Not quite right. Let's review the correct values:</h3>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Show the formula mapping
+            st.markdown("### 📐 Formula Mapping")
+            
+            st.markdown(f"""
+            <div class="formula-box">
+                <p style="font-size: 1.1rem; color: #94a3b8; margin-bottom: 12px;">Plugging in the values:</p>
+                <div style="font-size: 1.5rem; color: #f8fafc;">
+                    X = <span class="highlight-desired">{problem['desired']}{problem['desired_unit']}</span> ÷ 
+                    <span class="highlight-have">{problem['have']}{problem['have_unit']}</span> × 
+                    <span class="highlight-vehicle">{problem['vehicle']} {problem['vehicle_unit']}</span>
+                </div>
+                <p style="font-size: 1.3rem; color: #10b981; margin-top: 16px; font-weight: 600;">
+                    = {problem['answer']} {problem['answer_unit']}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            with st.expander("📝 Show Full Working"):
+                if problem['formula'] == 'tablets':
+                    st.markdown(format_working_tablet({
+                        'desired': problem['desired'],
+                        'have': problem['have'],
+                        'answer': problem['answer']
+                    }))
+                elif problem['formula'] == 'liquid':
+                    st.markdown(format_working_liquid({
+                        'desired': problem['desired'],
+                        'have': problem['have'],
+                        'vehicle': problem['vehicle'],
+                        'answer': problem['answer']
+                    }))
+                else:
+                    st.markdown(format_working_pediatric({
+                        'weight': problem.get('weight', 0),
+                        'dose_per_kg': problem.get('dose_per_kg', 0),
+                        'total_daily': problem['desired'],
+                        'frequency': 1,
+                        'per_dose': problem['desired'],
+                        'have': problem['have'],
+                        'vehicle': problem['vehicle'],
+                        'volume_per_dose': problem['answer']
+                    }))
+            
+            st.markdown(f"""
+            <div class="sanity-check">
+                {get_sanity_check('tablet' if problem['formula'] == 'tablets' else 'liquid')}
+            </div>
+            """, unsafe_allow_html=True)
+
+
+    # ============================================================================
+    # MODULE B: UNIT BOOTCAMP
+    # ============================================================================
+
+    with tabs[1]:
+        st.markdown("## 📏 Module B: Unit Bootcamp")
+        
+        st.markdown("""
+        <div class="info-card">
+            <h3>🎯 Master Unit Conversions</h3>
+            <p>Before you can calculate doses, you MUST be able to convert between units!</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Mnemonic display
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            <div class="mnemonic-box">
+                <h3>📉 SOLD</h3>
+                <p>Small to Large = Divide</p>
+                <p style="font-size: 0.9rem;">mcg → mg → g → kg</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown("""
+            <div class="mnemonic-box">
+                <h3>📈 LOST</h3>
+                <p>Large to Small = Times</p>
+                <p style="font-size: 0.9rem;">kg → g → mg → mcg</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        col1, col2 = st.columns([3, 1])
+        with col2:
+            if st.button("🎲 New Conversion", key="new_conversion", use_container_width=True):
+                st.session_state.conversion_problem = generate_conversion_problem()
+                st.session_state.conversion_submitted = False
+                st.session_state.conversion_correct = False
+                st.rerun()
+        
+        if st.session_state.conversion_problem is None:
+            st.session_state.conversion_problem = generate_conversion_problem()
+        
+        conv = st.session_state.conversion_problem
+        
+        st.markdown(f"""
+        <div class="scenario-text">
+            🔄 Convert: <strong>{conv['value']} {conv['from_unit']}</strong> to <strong>{conv['to_unit']}</strong>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        user_answer = st.number_input(
+            f"Your answer in {conv['to_unit']}:",
+            key="conv_answer",
+            min_value=0.0,
+            step=0.0001,
+            format="%.4f"
+        )
+        
+        if st.button("✅ Check Answer", key="check_conversion", use_container_width=True):
+            st.session_state.conversion_submitted = True
+            
+            # Check with tolerance
+            tolerance = abs(conv['answer'] * 0.01)  # 1% tolerance
+            is_correct = abs(user_answer - conv['answer']) <= max(tolerance, 0.001)
+            st.session_state.conversion_correct = is_correct
+            
+            if is_correct:
+                st.session_state.total_correct += 1
+            st.session_state.total_attempted += 1
+        
+        if st.session_state.conversion_submitted:
+            if st.session_state.conversion_correct:
+                st.markdown("""
+                <div class="success-card">
+                    <h3>✅ Correct!</h3>
+                </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown(f"""
                 <div class="error-card">
-                    <h3>❌ Correct values:</h3>
-                    <p>Saving: £{prob['saving_per_pack']} | Reduction: {prob['percentage_reduction']}% | Weekly: £{prob['weekly_saving']}</p>
+                    <h3>❌ Not quite. The correct answer is {conv['answer']} {conv['to_unit']}</h3>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with st.expander("📝 Show Working"):
+                st.markdown(format_working_conversion(conv))
+            
+            st.markdown(f"""
+            <div class="sanity-check">
+                {get_sanity_check('conversion')}
+            </div>
+            """, unsafe_allow_html=True)
+
+
+    # ============================================================================
+    # MODULE C: TABLET & LIQUID DOSAGES
+    # ============================================================================
+
+    with tabs[2]:
+        st.markdown("## 💊 Module C: Tablet & Liquid Dosages")
+        
+        sub_tabs = st.tabs(["💊 Tablets", "🧴 Liquids"])
+        
+        # TABLETS
+        with sub_tabs[0]:
+            st.markdown("""
+            <div class="info-card">
+                <h3>💊 Tablet Calculations</h3>
+                <p>Formula: Tablets = Desired ÷ Have</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button("🎲 New Problem", key="new_tablet", use_container_width=True):
+                    st.session_state.tablet_problem = generate_tablet_problem()
+                    st.session_state.tablet_submitted = False
+                    st.rerun()
+            
+            if st.session_state.tablet_problem is None:
+                st.session_state.tablet_problem = generate_tablet_problem()
+            
+            prob = st.session_state.tablet_problem
+            
+            st.markdown(f"""
+            <div class="scenario-text">
+                {prob['scenario']}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            user_tablets = st.number_input(
+                "Number of tablets to give:",
+                key="tablet_answer",
+                min_value=0.0,
+                step=0.5,
+                format="%.1f"
+            )
+            
+            if st.button("✅ Check Answer", key="check_tablet", use_container_width=True):
+                st.session_state.tablet_submitted = True
+                is_correct = abs(user_tablets - prob['answer']) < 0.01
+                
+                if is_correct:
+                    st.session_state.total_correct += 1
+                    st.markdown("""
+                    <div class="success-card"><h3>✅ Correct!</h3></div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="error-card"><h3>❌ The correct answer is {prob['answer']} tablet(s)</h3></div>
+                    """, unsafe_allow_html=True)
+                
+                st.session_state.total_attempted += 1
+                
+                with st.expander("📝 Show Working"):
+                    st.markdown(format_working_tablet(prob))
+                
+                st.markdown(f"""
+                <div class="sanity-check">
+                    {get_sanity_check('tablet')}
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # LIQUIDS
+        with sub_tabs[1]:
+            st.markdown("""
+            <div class="info-card">
+                <h3>🧴 Liquid Calculations</h3>
+                <p>Formula: Volume = (Desired ÷ Have) × Vehicle</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button("🎲 New Problem", key="new_liquid", use_container_width=True):
+                    st.session_state.liquid_problem = generate_liquid_problem()
+                    st.session_state.liquid_submitted = False
+                    st.rerun()
+            
+            if st.session_state.liquid_problem is None:
+                st.session_state.liquid_problem = generate_liquid_problem()
+            
+            prob = st.session_state.liquid_problem
+            
+            st.markdown(f"""
+            <div class="scenario-text">
+                {prob['scenario']}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            user_volume = st.number_input(
+                "Volume to administer (mL):",
+                key="liquid_answer",
+                min_value=0.0,
+                step=0.1,
+                format="%.2f"
+            )
+            
+            if st.button("✅ Check Answer", key="check_liquid", use_container_width=True):
+                st.session_state.liquid_submitted = True
+                is_correct = abs(user_volume - prob['answer']) < 0.1
+                
+                if is_correct:
+                    st.session_state.total_correct += 1
+                    st.markdown("""
+                    <div class="success-card"><h3>✅ Correct!</h3></div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="error-card"><h3>❌ The correct answer is {prob['answer']}mL</h3></div>
+                    """, unsafe_allow_html=True)
+                
+                st.session_state.total_attempted += 1
+                
+                with st.expander("📝 Show Working"):
+                    st.markdown(format_working_liquid(prob))
+                
+                st.markdown(f"""
+                <div class="sanity-check">
+                    {get_sanity_check('liquid')}
+                </div>
+                """, unsafe_allow_html=True)
+
+
+    # ============================================================================
+    # MODULE D: PEDIATRIC WEIGHT-BASED DOSING
+    # ============================================================================
+
+    with tabs[3]:
+        st.markdown("## 👶 Module D: Pediatric Weight-Based Dosing")
+        
+        st.markdown("""
+        <div class="info-card">
+            <h3>🎯 Weight-Based Calculations (mg/kg)</h3>
+            <p>Pediatric doses are calculated based on the child's weight. This requires multiple steps!</p>
+            <ol>
+                <li>Calculate total daily dose: mg/kg × weight</li>
+                <li>Divide by frequency (how many times per day)</li>
+                <li>Convert to volume if using liquid</li>
+            </ol>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns([3, 1])
+        with col2:
+            if st.button("🎲 New Problem", key="new_pediatric", use_container_width=True):
+                st.session_state.pediatric_problem = generate_pediatric_problem()
+                st.session_state.pediatric_submitted = False
+                st.rerun()
+        
+        if st.session_state.pediatric_problem is None:
+            st.session_state.pediatric_problem = generate_pediatric_problem()
+        
+        prob = st.session_state.pediatric_problem
+        
+        st.markdown(f"""
+        <div class="scenario-text">
+            {prob['scenario']}
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("### 📊 Step-by-Step Entry")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**Step 1: Total Daily Dose (mg)**")
+            user_daily = st.number_input("Daily dose:", key="ped_daily", min_value=0.0, step=1.0, format="%.1f")
+        
+        with col2:
+            st.markdown("**Step 2: Dose Per Administration (mg)**")
+            user_per_dose = st.number_input("Per dose:", key="ped_perdose", min_value=0.0, step=0.1, format="%.2f")
+        
+        with col3:
+            st.markdown("**Step 3: Volume Per Dose (mL)**")
+            user_volume = st.number_input("Volume:", key="ped_volume", min_value=0.0, step=0.1, format="%.2f")
+        
+        if st.button("✅ Check All Steps", key="check_pediatric", use_container_width=True):
+            st.session_state.pediatric_submitted = True
+            
+            daily_correct = abs(user_daily - prob['total_daily']) < 1
+            per_dose_correct = abs(user_per_dose - prob['per_dose']) < 0.5
+            volume_correct = abs(user_volume - prob['volume_per_dose']) < 0.5
+            
+            all_correct = daily_correct and per_dose_correct and volume_correct
+            
+            if all_correct:
+                st.session_state.total_correct += 1
+                st.markdown("""
+                <div class="success-card"><h3>✅ All steps correct! Excellent work!</h3></div>
+                """, unsafe_allow_html=True)
+            else:
+                results = []
+                if not daily_correct:
+                    results.append(f"Step 1: Should be {prob['total_daily']}mg")
+                if not per_dose_correct:
+                    results.append(f"Step 2: Should be {prob['per_dose']}mg")
+                if not volume_correct:
+                    results.append(f"Step 3: Should be {prob['volume_per_dose']}mL")
+                
+                st.markdown(f"""
+                <div class="error-card">
+                    <h3>❌ Some steps need correction:</h3>
+                    <ul>{''.join(f'<li>{r}</li>' for r in results)}</ul>
                 </div>
                 """, unsafe_allow_html=True)
             
             st.session_state.total_attempted += 1
             
-            with st.expander("📝 Show Working"):
-                st.markdown(format_working_cost(prob))
+            with st.expander("📝 Show Full Working"):
+                st.markdown(format_working_pediatric(prob))
             
             st.markdown(f"""
             <div class="sanity-check">
-                {get_sanity_check('cost')}
+                {get_sanity_check('pediatric')}
             </div>
             """, unsafe_allow_html=True)
-    
-    else:  # Custom Calculator
-        st.markdown("### 🧮 Enter Your Own Values")
+
+
+    # ============================================================================
+    # MODULE E: INFUSIONS & DILUTIONS
+    # ============================================================================
+
+    with tabs[4]:
+        st.markdown("## 💉 Module E: Infusions & Dilutions")
         
-        col1, col2 = st.columns(2)
+        sub_tabs = st.tabs(["💧 IV Drip Rates", "🧪 Dilutions (C₁V₁=C₂V₂)"])
         
-        with col1:
-            brand_cost = st.number_input("Brand cost (£):", min_value=0.01, value=30.00, step=0.01, format="%.2f")
-            pack_size = st.number_input("Tablets per pack:", min_value=1, value=28, step=1)
-        
-        with col2:
-            generic_cost = st.number_input("Generic cost (£):", min_value=0.01, value=10.00, step=0.01, format="%.2f")
-            doses_per_day = st.number_input("Doses per day:", min_value=1, value=1, step=1)
-        
-        if st.button("📊 Calculate Savings", use_container_width=True):
-            saving_per_pack = brand_cost - generic_cost
-            percentage = (saving_per_pack / brand_cost) * 100 if brand_cost > 0 else 0
-            days_supply = pack_size // doses_per_day
-            weekly = (saving_per_pack / days_supply) * 7 if days_supply > 0 else 0
-            annual = saving_per_pack * (365 / days_supply) if days_supply > 0 else 0
+        # IV DRIP RATES
+        with sub_tabs[0]:
+            st.markdown("""
+            <div class="info-card">
+                <h3>💧 IV Drip Rate Formula</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.latex(r"\text{Drops/min} = \frac{\text{Volume (mL)}}{\text{Time (min)}} \times \text{Drop Factor (gtts/mL)}")
+            
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button("🎲 New Problem", key="new_infusion", use_container_width=True):
+                    st.session_state.infusion_problem = generate_infusion_problem()
+                    st.session_state.infusion_submitted = False
+                    st.rerun()
+            
+            if st.session_state.infusion_problem is None:
+                st.session_state.infusion_problem = generate_infusion_problem()
+            
+            prob = st.session_state.infusion_problem
             
             st.markdown(f"""
-            <div class="success-card">
-                <h3>📊 Cost Analysis Results</h3>
-                <table style="width:100%; color: white;">
-                    <tr><td>Saving per pack:</td><td><strong>£{saving_per_pack:.2f}</strong></td></tr>
-                    <tr><td>Percentage reduction:</td><td><strong>{percentage:.1f}%</strong></td></tr>
-                    <tr><td>Days supply per pack:</td><td><strong>{days_supply} days</strong></td></tr>
-                    <tr><td>Weekly saving:</td><td><strong>£{weekly:.2f}</strong></td></tr>
-                    <tr><td>Annual saving:</td><td><strong>£{annual:.2f}</strong></td></tr>
-                </table>
+            <div class="scenario-text">
+                {prob['scenario']}
             </div>
             """, unsafe_allow_html=True)
+            
+            user_rate = st.number_input(
+                "Drip rate (drops/minute):",
+                key="infusion_answer",
+                min_value=0.0,
+                step=0.5,
+                format="%.1f"
+            )
+            
+            if st.button("✅ Check Answer", key="check_infusion", use_container_width=True):
+                st.session_state.infusion_submitted = True
+                is_correct = abs(user_rate - prob['drops_per_min']) < 1
+                
+                if is_correct:
+                    st.session_state.total_correct += 1
+                    st.markdown("""
+                    <div class="success-card"><h3>✅ Correct!</h3></div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="error-card"><h3>❌ The correct answer is {prob['drops_per_min']} drops/min</h3></div>
+                    """, unsafe_allow_html=True)
+                
+                st.session_state.total_attempted += 1
+                
+                with st.expander("📝 Show Working"):
+                    st.markdown(format_working_infusion(prob))
+                
+                st.markdown(f"""
+                <div class="sanity-check">
+                    {get_sanity_check('infusion')}
+                </div>
+                """, unsafe_allow_html=True)
+        
+        # DILUTIONS
+        with sub_tabs[1]:
+            st.markdown("""
+            <div class="info-card">
+                <h3>🧪 Dilution Formula</h3>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.latex(r"C_1V_1 = C_2V_2")
+            st.markdown("""
+            Where:
+            - **C₁** = Concentration of stock solution
+            - **V₁** = Volume of stock solution needed
+            - **C₂** = Desired final concentration
+            - **V₂** = Desired final volume
+            """)
+            
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button("🎲 New Problem", key="new_dilution", use_container_width=True):
+                    st.session_state.dilution_problem = generate_dilution_problem()
+                    st.session_state.dilution_submitted = False
+                    st.rerun()
+            
+            if st.session_state.dilution_problem is None:
+                st.session_state.dilution_problem = generate_dilution_problem()
+            
+            prob = st.session_state.dilution_problem
+            
+            st.markdown(f"""
+            <div class="scenario-text">
+                {prob['scenario']}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                user_stock = st.number_input(
+                    "Stock solution volume (mL):",
+                    key="dilution_stock",
+                    min_value=0.0,
+                    step=0.1,
+                    format="%.2f"
+                )
+            with col2:
+                user_diluent = st.number_input(
+                    "Diluent volume (mL):",
+                    key="dilution_diluent",
+                    min_value=0.0,
+                    step=0.1,
+                    format="%.2f"
+                )
+            
+            if st.button("✅ Check Answer", key="check_dilution", use_container_width=True):
+                st.session_state.dilution_submitted = True
+                
+                stock_correct = abs(user_stock - prob['v1']) < 0.5
+                diluent_correct = abs(user_diluent - prob['diluent']) < 0.5
+                
+                if stock_correct and diluent_correct:
+                    st.session_state.total_correct += 1
+                    st.markdown("""
+                    <div class="success-card"><h3>✅ Both values correct!</h3></div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="error-card">
+                        <h3>❌ Correct values:</h3>
+                        <p>Stock: {prob['v1']}mL | Diluent: {prob['diluent']}mL</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.session_state.total_attempted += 1
+                
+                with st.expander("📝 Show Working"):
+                    st.markdown(format_working_dilution(prob))
+                
+                st.markdown(f"""
+                <div class="sanity-check">
+                    {get_sanity_check('dilution')}
+                </div>
+                """, unsafe_allow_html=True)
+
+
+    # ============================================================================
+    # MODULE F: PHARMACOECONOMICS
+    # ============================================================================
+
+    with tabs[5]:
+        st.markdown("## 💰 Module F: Pharmacoeconomics - Cost Savings")
+        
+        st.markdown("""
+        <div class="info-card">
+            <h3>🎯 Calculate Medication Cost Savings</h3>
+            <p>Switching from branded to generic medications can save significant money. Learn to calculate these savings!</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        mode = st.radio(
+            "Choose mode:",
+            ["📝 Practice Problem", "🧮 Custom Calculator"],
+            horizontal=True
+        )
+        
+        if mode == "📝 Practice Problem":
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button("🎲 New Problem", key="new_cost", use_container_width=True):
+                    st.session_state.cost_problem = generate_cost_problem()
+                    st.rerun()
+            
+            if st.session_state.cost_problem is None:
+                st.session_state.cost_problem = generate_cost_problem()
+            
+            prob = st.session_state.cost_problem
+            
+            st.markdown(f"""
+            <div class="scenario-text">
+                {prob['scenario']}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("### Calculate the following:")
+            
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                user_saving = st.number_input("Saving per pack (£):", key="cost_saving", min_value=0.0, step=0.01, format="%.2f")
+            
+            with col2:
+                user_percent = st.number_input("Percentage reduction (%):", key="cost_percent", min_value=0.0, max_value=100.0, step=0.1, format="%.1f")
+            
+            with col3:
+                user_weekly = st.number_input("Weekly saving (£):", key="cost_weekly", min_value=0.0, step=0.01, format="%.2f")
+            
+            if st.button("✅ Check Answers", key="check_cost", use_container_width=True):
+                saving_correct = abs(user_saving - prob['saving_per_pack']) < 0.05
+                percent_correct = abs(user_percent - prob['percentage_reduction']) < 1
+                weekly_correct = abs(user_weekly - prob['weekly_saving']) < 0.1
+                
+                all_correct = saving_correct and percent_correct and weekly_correct
+                
+                if all_correct:
+                    st.session_state.total_correct += 1
+                    st.markdown("""
+                    <div class="success-card"><h3>✅ All calculations correct!</h3></div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="error-card">
+                        <h3>❌ Correct values:</h3>
+                        <p>Saving: £{prob['saving_per_pack']} | Reduction: {prob['percentage_reduction']}% | Weekly: £{prob['weekly_saving']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                st.session_state.total_attempted += 1
+                
+                with st.expander("📝 Show Working"):
+                    st.markdown(format_working_cost(prob))
+                
+                st.markdown(f"""
+                <div class="sanity-check">
+                    {get_sanity_check('cost')}
+                </div>
+                """, unsafe_allow_html=True)
+        
+        else:  # Custom Calculator
+            st.markdown("### 🧮 Enter Your Own Values")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                brand_cost = st.number_input("Brand cost (£):", min_value=0.01, value=30.00, step=0.01, format="%.2f")
+                pack_size = st.number_input("Tablets per pack:", min_value=1, value=28, step=1)
+            
+            with col2:
+                generic_cost = st.number_input("Generic cost (£):", min_value=0.01, value=10.00, step=0.01, format="%.2f")
+                doses_per_day = st.number_input("Doses per day:", min_value=1, value=1, step=1)
+            
+            if st.button("📊 Calculate Savings", use_container_width=True):
+                saving_per_pack = brand_cost - generic_cost
+                percentage = (saving_per_pack / brand_cost) * 100 if brand_cost > 0 else 0
+                days_supply = pack_size // doses_per_day
+                weekly = (saving_per_pack / days_supply) * 7 if days_supply > 0 else 0
+                annual = saving_per_pack * (365 / days_supply) if days_supply > 0 else 0
+                
+                st.markdown(f"""
+                <div class="success-card">
+                    <h3>📊 Cost Analysis Results</h3>
+                    <table style="width:100%; color: white;">
+                        <tr><td>Saving per pack:</td><td><strong>£{saving_per_pack:.2f}</strong></td></tr>
+                        <tr><td>Percentage reduction:</td><td><strong>{percentage:.1f}%</strong></td></tr>
+                        <tr><td>Days supply per pack:</td><td><strong>{days_supply} days</strong></td></tr>
+                        <tr><td>Weekly saving:</td><td><strong>£{weekly:.2f}</strong></td></tr>
+                        <tr><td>Annual saving:</td><td><strong>£{annual:.2f}</strong></td></tr>
+                    </table>
+                </div>
+                """, unsafe_allow_html=True)
+
+
+
+elif app_mode == "🩺 Clinical Pharmacology (MedOps)":
+    # ------------------------------------------------------------------------
+    # NEW MEDOPS MODULE
+    # ------------------------------------------------------------------------
+    st.markdown("# 🩺 Clinical Pharmacology (MedOps)")
+    st.markdown("*Test your knowledge of mechanisms, adverse effects, and clinical management.*")
+    
+    medops_tabs = st.tabs([
+        "🍏 GI System", 
+        "🫁 Respiratory System", 
+        "🏥 Clinical Scenarios"
+    ])
+    
+    tab_names = ["GI System", "Respiratory System", "Clinical Scenarios"]
+    
+    for idx, tab_name in enumerate(tab_names):
+        with medops_tabs[idx]:
+            st.markdown(f"""
+            <div class="info-card">
+                <h3>{tab_name} Focus</h3>
+                <p>Answer the clinical questions below based on your pharmacological knowledge.</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            problem_key = f"medops_problem_{idx}"
+            submitted_key = f"medops_submitted_{idx}"
+            correct_key = f"medops_correct_{idx}"
+            user_ans_key = f"medops_user_ans_{idx}"
+            
+            # Generate new problem button
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button(f"🎲 Next {tab_name} Question", key=f"new_medops_{idx}", use_container_width=True):
+                    st.session_state[problem_key] = generate_medops_problem(tab_name)
+                    st.session_state[submitted_key] = False
+                    st.session_state[user_ans_key] = None
+                    st.rerun()
+                    
+            # Initialize problem if missing
+            if problem_key not in st.session_state or st.session_state[problem_key] is None:
+                st.session_state[problem_key] = generate_medops_problem(tab_name)
+                st.session_state[submitted_key] = False
+                st.session_state[correct_key] = False
+                st.session_state[user_ans_key] = None
+                
+            prob = st.session_state[problem_key]
+            
+            # Display Scenario
+            st.markdown(f"""
+            <div class="scenario-text">
+                <strong>📝 Clinical Scenario:</strong><br><br>
+                {prob['scenario']}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Form for answering
+            with st.form(key=f"form_medops_{idx}"):
+                user_choice = st.radio("Select the most appropriate answer:", prob['options'], key=f"radio_medops_{idx}")
+                submitted = st.form_submit_button("✅ Submit Answer")
+                
+                if submitted:
+                    st.session_state[submitted_key] = True
+                    st.session_state[user_ans_key] = user_choice
+                    
+                    if user_choice == prob['answer']:
+                        st.session_state.total_correct += 1
+                        st.session_state[correct_key] = True
+                    else:
+                        st.session_state[correct_key] = False
+                        
+                    st.session_state.total_attempted += 1
+            
+            # Show results and rationale after submission
+            if st.session_state[submitted_key] and st.session_state[user_ans_key] is not None:
+                if st.session_state[correct_key]:
+                    st.markdown("""
+                    <div class="success-card">
+                        <h3>✅ Correct!</h3>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="error-card">
+                        <h3>❌ Incorrect.</h3>
+                        <p><strong>You selected:</strong> {st.session_state[user_ans_key]}</p>
+                        <p><strong>Correct answer:</strong> {prob['answer']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                with st.expander("📚 View Clinical Rationale", expanded=True):
+                    st.markdown(f"**Explanation:**<br> {prob['explanation']}", unsafe_allow_html=True)
 
 
 # ============================================================================
@@ -1120,7 +1226,7 @@ with tabs[5]:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #64748b; padding: 20px;">
-    <p>💊 <strong>Dosage Master Pro</strong> | Educational Tool for Clinical Calculations</p>
-    <p style="font-size: 0.8rem;">Always double-check calculations in clinical practice. This tool is for educational purposes only.</p>
+    <p>💊 <strong>Dosage Master Pro</strong> | Educational Tool for Clinical Practice</p>
+    <p style="font-size: 0.8rem;">Always follow local clinical guidelines and check BNF. This tool is for educational purposes only.</p>
 </div>
 """, unsafe_allow_html=True)

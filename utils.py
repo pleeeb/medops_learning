@@ -7,6 +7,141 @@ EXPANDED VERSION: ~20+ unique scenarios per module
 import random
 from typing import Dict, Tuple, List, Any
 
+def get_random_drug(category: str = None) -> str:
+    """Get a random drug name, optionally from a specific category."""
+    if category and category in DRUGS:
+        return random.choice(DRUGS[category])
+    all_drugs = [drug for drugs in DRUGS.values() for drug in drugs]
+    return random.choice(all_drugs)
+
+# ============================================================================
+# MEDOPS (CLINICAL PHARMACOLOGY) DATABASE
+# ============================================================================
+
+MEDOPS_QUESTIONS = {
+    "GI System": [
+        {
+            "template": "A {age}-year-old {gender} requires a medication that aids in gastric emptying. Which of the following is a prokinetic agent?",
+            "correct": ["Metoclopramide", "Domperidone"],
+            "distractors": ["Omeprazole", "Famotidine", "Budesonide", "Loperamide", "Hyoscine"],
+            "explanation": "Prokinetic agents like metoclopramide and domperidone enhance esophageal peristalsis and accelerate gastric emptying."
+        },
+        {
+            "template": "Which of the following medications is a histamine type 2 (H2) receptor blocker prescribed for a {age}-year-old {gender} with acid reflux?",
+            "correct": ["Famotidine"],
+            "distractors": ["Omeprazole", "Magnesium hydroxide", "Metoclopramide", "Pantoprazole", "Lansoprazole"],
+            "explanation": "Famotidine is an H2 blocker. It binds to histamine type 2 receptors on gastric parietal cells to interfere with gastric acid production. Omeprazole and Pantoprazole are PPIs."
+        },
+        {
+            "template": "A {age}-year-old {gender} is prescribed ondansetron for post-operative nausea. Which of the following is a common side effect of this medication?",
+            "correct": ["Constipation", "Feeling hot", "Headache"],
+            "distractors": ["Diarrhoea", "Movement disorders", "Hyperprolactinemia", "Dry mouth"],
+            "explanation": "Ondansetron is a serotonin antagonist. Common side effects include constipation, feeling hot, and headache. Movement disorders are typically associated with dopamine antagonists like metoclopramide."
+        },
+        {
+            "template": "An elderly patient with multiple comorbidities is found to have hyponatremia. Which of the following gastrointestinal medications could predispose them to this condition?",
+            "correct": ["Lansoprazole", "Omeprazole", "Pantoprazole", "Esomeprazole"],
+            "distractors": ["Azathioprine", "Famotidine", "Prednisolone", "Sulfasalazine", "Domperidone"],
+            "explanation": "Proton Pump Inhibitors (PPIs) like Lansoprazole and Omeprazole have hyponatremia listed as a possible side effect, particularly in elderly patients."
+        },
+        {
+            "template": "A patient with acute ulcerative colitis requires symptom management. Which of the following medications is CONTRAINDICATED for treating their diarrhoea?",
+            "correct": ["Loperamide", "Codeine phosphate"],
+            "distractors": ["Mesalazine", "Prednisolone", "Sulfasalazine", "Infliximab"],
+            "explanation": "Anti-diarrhoeal drugs like loperamide and codeine are contraindicated in acute ulcerative colitis due to the severe risk of triggering a toxic megacolon."
+        }
+    ],
+    "Respiratory System": [
+        {
+            "template": "A {age}-year-old {gender} with a history of asthma requires pain relief for a sprained ankle. Which of the following drugs should be used with extreme caution or avoided as it may worsen asthma symptoms?",
+            "correct": ["Ibuprofen", "Naproxen", "Aspirin", "Diclofenac"],
+            "distractors": ["Paracetamol", "Codeine", "Tramadol", "Loratadine"],
+            "explanation": "NSAIDs are cautioned or contra-indicated in people with asthma, depending on previous history, as they can trigger bronchospasm and worsen asthma symptoms."
+        },
+        {
+            "template": "Which of the following antibiotics is well-known for the rare but serious risk of causing pulmonary damage (such as pulmonary fibrosis)?",
+            "correct": ["Nitrofurantoin"],
+            "distractors": ["Amoxicillin", "Doxycycline", "Trimethoprim", "Azithromycin"],
+            "explanation": "Nitrofurantoin is an antibiotic that carries a known risk of pulmonary damage and hepatic adverse drug reactions."
+        },
+        {
+            "template": "A {age}-year-old {gender} is taking Amiodarone for arrhythmias. What specific adverse effect should you monitor for in relation to the respiratory system?",
+            "correct": ["Pulmonary toxicity / damage"],
+            "distractors": ["Bronchospasm", "Nasal congestion", "Rebound congestion", "Oropharyngeal candidiasis"],
+            "explanation": "Amiodarone is a cardiovascular medication that has known adverse effects causing pulmonary damage and toxicity."
+        },
+        {
+            "template": "A patient is prescribed an inhaled medication that works by blocking acetylcholine (ACh) receptors to treat their COPD. Which medication fits this mechanism?",
+            "correct": ["Ipratropium"],
+            "distractors": ["Salbutamol", "Beclometasone", "Montelukast", "Prednisone"],
+            "explanation": "Ipratropium is an anticholinergic inhaler that works by blocking acetylcholine (ACh) receptors, leading to bronchodilation."
+        },
+        {
+            "template": "A {age}-year-old patient with asthma is inadvertently prescribed a medication for hypertension that causes an acute asthma exacerbation. Which drug class does this medication likely belong to?",
+            "correct": ["Beta-blockers"],
+            "distractors": ["ACE inhibitors", "Calcium channel blockers", "Diuretics", "Nitrates"],
+            "explanation": "Beta-blockers (e.g., Propranolol, Atenolol) block beta-2 receptors in the lungs, which can induce severe bronchospasms in asthmatic patients."
+        }
+    ],
+    "Clinical Scenarios": [
+        {
+            "template": "A {age}-year-old patient on methotrexate maintenance therapy presents to the clinic with a sore throat. Which of the following investigations is the most immediate priority?",
+            "correct": ["FBC (Full Blood Count)"],
+            "distractors": ["LFT (Liver Function Tests)", "TFT (Thyroid Function Tests)", "RFT (Renal Function Tests)", "ECG"],
+            "explanation": "Methotrexate can cause severe bone marrow depression (leucopenia, thrombocytopenia). A sore throat could be an early sign of an infection secondary to dangerous neutropenia. An FBC must be done immediately."
+        },
+        {
+            "template": "A {age}-year-old {gender} with Crohn's disease presents with severe abdominal pain radiating to the back. Which of the following medications from their prescription history is the most likely cause?",
+            "correct": ["Azathioprine", "Mercaptopurine"],
+            "distractors": ["Prednisolone", "Omeprazole", "Infliximab", "Mesalazine", "Loperamide"],
+            "explanation": "Severe abdominal pain radiating to the back is the classic clinical presentation of acute pancreatitis. Azathioprine and mercaptopurine carry a known risk of drug-induced pancreatitis."
+        },
+        {
+            "template": "A 12-year-old child notices they have blurred vision and a dry mouth after taking a medication prescribed for a 'tummy ache' (abdominal spasm). Which medication is the most likely cause?",
+            "correct": ["Hyoscine"],
+            "distractors": ["Paracetamol", "Ibuprofen", "Peppermint oil", "Mebeverine", "Metoclopramide"],
+            "explanation": "Hyoscine is an anticholinergic antispasmodic. Common side effects of blocking acetylcholine include dilated pupils, blurred vision, dry mouth, and constipation."
+        },
+        {
+            "template": "A 55-year-old patient presents to the GP with new-onset constipation, abdominal pain, and unexplained weight loss. What is the most appropriate next step in management?",
+            "correct": ["Urgent investigation for sinister causes (e.g., bowel cancer)"],
+            "distractors": ["Start a bulk-forming laxative immediately", "Prescribe loperamide", "Advise increased dietary fibre and review in 4 weeks", "Switch to an osmotic laxative"],
+            "explanation": "New-onset constipation in individuals over 50, especially with 'red flag' accompanying symptoms like weight loss, anemia, or blood in stool, requires urgent investigation to rule out sinister causes like malignancy."
+        }
+    ]
+}
+
+def generate_medops_problem(category: str) -> Dict[str, Any]:
+    """Generate a dynamic multiple-choice question for the MedOps section."""
+    q_data = random.choice(MEDOPS_QUESTIONS[category])
+    
+    # Randomize patient demographics for dynamic feel
+    age = random.randint(18, 75)
+    # If the template explicitly mentions a child, adjust the age
+    if "12-year-old" in q_data["template"] or "child" in q_data["template"] or "pediatric" in q_data["template"]:
+        age = random.randint(6, 16)
+    gender = random.choice(["male", "female"])
+    
+    scenario = q_data["template"].format(age=age, gender=gender)
+    
+    # Pick one correct answer randomly if there are multiple valid options
+    correct_ans = random.choice(q_data["correct"])
+    
+    # Pick 3 random distractors
+    num_distractors = min(3, len(q_data["distractors"]))
+    wrong_answers = random.sample(q_data["distractors"], num_distractors)
+    
+    # Combine and shuffle options
+    options = wrong_answers + [correct_ans]
+    random.shuffle(options)
+    
+    return {
+        "scenario": scenario,
+        "options": options,
+        "answer": correct_ans,
+        "explanation": q_data["explanation"]
+    }
+
 
 # ============================================================================
 # EXPANDED DRUG DATABASE - More realistic variety
